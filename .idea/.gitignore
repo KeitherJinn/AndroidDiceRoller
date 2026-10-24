@@ -1,3 +1,6 @@
-# Default ignored files
-/shelf/
-/workspace.xml
+# Keep only portable project conventions; Android Studio recreates local state.
+/*
+!/.gitignore
+!/codeStyles/
+!/inspectionProfiles/
+!/vcs.xml

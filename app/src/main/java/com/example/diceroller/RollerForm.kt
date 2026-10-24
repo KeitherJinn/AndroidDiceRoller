@@ -59,7 +59,8 @@ internal fun NotationField(state: RollerUiState, onChange: (String) -> Unit, foc
     OutlinedTextField(
         value = state.notation, onValueChange = onChange, enabled = !state.busy,
         label = { Text(stringResource(R.string.dice_notation)) },
-        supportingText = { Text(state.notationIssue?.let { issueText(it) } ?: stringResource(R.string.notation_hint)) },
+        supportingText = { Text(state.notationIssue?.let { issueText(it) }
+            ?: stringResource(R.string.notation_hint, *DiceNotationExamples.values.toTypedArray())) },
         isError = state.notationIssue != null, singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii, autoCorrectEnabled = false, imeAction = ImeAction.Next),
         keyboardActions = KeyboardActions(onNext = { onNext() }),
@@ -139,7 +140,7 @@ internal fun modeHint(mode: RollMode): String = stringResource(when (mode) {
 
 @Composable
 internal fun issueText(issue: InputIssue): String = when (issue) {
-    InputIssue.NOTATION_FORMAT -> stringResource(R.string.error_notation)
+    InputIssue.NOTATION_FORMAT -> stringResource(R.string.error_notation, *DiceNotationExamples.values.toTypedArray())
     InputIssue.NOTATION_LENGTH -> stringResource(R.string.error_notation_length, RollLimits.MAX_NOTATION_LENGTH)
     InputIssue.DICE_LIMIT -> stringResource(R.string.error_dice_limit, RollLimits.MAX_DICE)
     InputIssue.SIDES_LIMIT -> stringResource(R.string.error_sides_limit, RollLimits.MAX_SIDES)

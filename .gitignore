@@ -1,15 +1,39 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Local build caches and generated output (all modules).
+.gradle/
+.kotlin/
+**/build/
+.externalNativeBuild/
+.cxx/
+hs_err_pid*.log
+replay_pid*.log
+*.hprof
+
+# Machine-specific Android SDK paths.
 local.properties
+
+# Packaged applications outside the ignored build directories.
+*.apk
+*.aab
+*.ap_
+
+# Private signing material and local credentials.
+*.jks
+*.keystore
+*.p12
+*.pfx
+key.properties
+keystore.properties
+signing.properties
+secrets.properties
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# IDE state is filtered by .idea/.gitignore; shared styles remain versioned.
+*.iml
+/captures/
+
+# Operating-system metadata.
+.DS_Store
+Thumbs.db

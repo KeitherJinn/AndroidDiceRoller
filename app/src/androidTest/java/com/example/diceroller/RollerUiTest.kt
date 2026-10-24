@@ -1,15 +1,18 @@
 package com.example.diceroller
 
+import android.app.UiAutomation
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.provider.Settings
+import android.view.Surface
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.espresso.Espresso
+import androidx.test.platform.app.InstrumentationRegistry
 import java.io.File
 import java.text.NumberFormat
 import org.junit.Assert.*
@@ -43,6 +46,44 @@ class RollerUiTest {
         compose.runOnIdle { model.setNotation("d1"); model.setTimes("1") }
         repeat(count) {
             compose.runOnIdle { assertTrue(model.roll()) }
+            settled()
+        }
+    }
+
+    /** Rotate the device without restricting the Activity; restore both stored rotation settings. */
+    private fun withDeviceRotation(test: ((Int) -> Unit) -> Unit) {
+        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        val resolver = compose.activity.contentResolver
+        val originalRotation = Settings.System.getInt(resolver, Settings.System.USER_ROTATION)
+        val originalAutoRotate = Settings.System.getInt(resolver, Settings.System.ACCELEROMETER_ROTATION)
+        val initialOrientation = compose.activity.resources.configuration.orientation
+        val displayRotation = requireNotNull(compose.activity.display).rotation
+        val naturalPortrait = if (displayRotation == Surface.ROTATION_0 || displayRotation == Surface.ROTATION_180) {
+            initialOrientation == Configuration.ORIENTATION_PORTRAIT
+        } else initialOrientation == Configuration.ORIENTATION_LANDSCAPE
+        check(originalRotation in Surface.ROTATION_0..Surface.ROTATION_270)
+        check(originalAutoRotate in 0..1)
+        try {
+            test { orientation ->
+                require(orientation == Configuration.ORIENTATION_PORTRAIT || orientation == Configuration.ORIENTATION_LANDSCAPE)
+                val rotation = if ((orientation == Configuration.ORIENTATION_PORTRAIT) == naturalPortrait) {
+                    UiAutomation.ROTATION_FREEZE_0
+                } else UiAutomation.ROTATION_FREEZE_90
+                assertTrue("Device rotation request failed", automation.setRotation(rotation))
+                compose.waitUntil(10_000) { compose.activity.resources.configuration.orientation == orientation }
+                settled()
+            }
+        } finally {
+            try {
+                assertTrue("Restoring the original device rotation failed", automation.setRotation(originalRotation))
+            } finally {
+                if (originalAutoRotate == 1) assertTrue("Restoring automatic rotation failed", automation.setRotation(UiAutomation.ROTATION_UNFREEZE))
+            }
+            compose.waitUntil(10_000) {
+                Settings.System.getInt(resolver, Settings.System.USER_ROTATION) == originalRotation &&
+                    Settings.System.getInt(resolver, Settings.System.ACCELEROMETER_ROTATION) == originalAutoRotate &&
+                    compose.activity.resources.configuration.orientation == initialOrientation
+            }
             settled()
         }
     }
@@ -115,7 +156,6 @@ class RollerUiTest {
         compose.onNodeWithTag("latest_result").assertIsNotDisplayed()
     }
 
-    // Orientation requests are test stimuli, restored in finally; the production Activity is not locked.
     @Test fun rotatingBetweenNarrowAndWideLayoutsKeepsTheVisibleHistoryBatch() {
         createBatches(10)
         val completion = compose.activity.resources.getQuantityString(R.plurals.rolls_completed, 1, 1)
@@ -126,23 +166,16 @@ class RollerUiTest {
         val tag = "history_${model.state.value.history[6].id}"
         showHistory(tag)
         compose.onNodeWithTag(tag).assertIsDisplayed()
-        val previous = compose.activity.requestedOrientation
-        try {
-            compose.runOnIdle { compose.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE }
-            compose.waitUntil(10_000) { compose.activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE }
-            settled()
+        withDeviceRotation { rotateTo ->
+            rotateTo(Configuration.ORIENTATION_LANDSCAPE)
             compose.onNodeWithTag(tag).assertIsDisplayed()
             compose.onNodeWithText(completion).assertDoesNotExist()
             if (compose.activity.resources.configuration.screenWidthDp >= 720) {
                 compose.onNodeWithTag("form_list").assertIsDisplayed()
             }
-            compose.runOnIdle { compose.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT }
-            compose.waitUntil(10_000) { compose.activity.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT }
-            settled()
+            rotateTo(Configuration.ORIENTATION_PORTRAIT)
             compose.onNodeWithTag(tag).assertIsDisplayed()
             compose.onNodeWithText(completion).assertDoesNotExist()
-        } finally {
-            compose.runOnIdle { compose.activity.requestedOrientation = previous }
         }
     }
 
@@ -380,19 +413,14 @@ class RollerUiTest {
     }
 
     @Test fun landscapeUsesSeparateFormAndResultsWhenTheWindowIsWideEnough() {
-        val previous = compose.activity.requestedOrientation
-        try {
-            compose.runOnIdle { compose.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE }
-            compose.waitUntil(10_000) { compose.activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE }
-            settled()
+        withDeviceRotation { rotateTo ->
+            rotateTo(Configuration.ORIENTATION_LANDSCAPE)
             assumeTrue(compose.activity.resources.configuration.screenWidthDp >= 720)
             compose.onNodeWithTag("form_list").assertIsDisplayed()
             compose.onNodeWithTag("main_list").assertIsDisplayed()
             showForm("notation")
             compose.onNodeWithTag("notation").assertIsDisplayed()
             compose.onNodeWithTag("roll_button").assertIsDisplayed()
-        } finally {
-            compose.runOnIdle { compose.activity.requestedOrientation = previous }
         }
     }
 }

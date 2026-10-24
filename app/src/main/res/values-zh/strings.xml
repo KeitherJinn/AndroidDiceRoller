@@ -4,7 +4,7 @@
     <string name="ready_hint">设置骰子后开始投掷，最新结果会显示在这里。</string>
     <string name="latest_result">最新结果</string>
     <string name="dice_notation">骰子表达式</string>
-    <string name="notation_hint">例如：d20、2d6+3、4d8-2</string>
+    <string name="notation_hint">例如：%1$s、%2$s、%3$s</string>
     <string name="repeat_count">重复次数</string>
     <string name="repeat_hint">每批 1–%1$d 次，实际投掷总量不超过 %2$d 颗骰子。</string>
     <string name="note_optional">备注（可选）</string>
@@ -31,7 +31,7 @@
     <string name="second_roll">第二组</string>
     <string name="chosen_total">选中总和：%s</string>
     <string name="modifier_value">修正值：%s</string>
-    <string name="error_notation">请输入有效表达式，例如 d20、2d6+3 或 4d8-2。</string>
+    <string name="error_notation">请输入有效表达式，例如 %1$s、%2$s 或 %3$s。</string>
     <string name="error_dice_limit">每个表达式的骰子数量须为 1–%d。</string>
     <string name="error_sides_limit">每颗骰子的面数须为 1–%d。</string>
     <string name="error_modifier_limit">修正值须为 -2147483648 至 2147483647 之间的整数。</string>

@@ -4,7 +4,7 @@
     <string name="ready_hint">Choose your dice. The latest result will appear here.</string>
     <string name="latest_result">Latest result</string>
     <string name="dice_notation">Dice expression</string>
-    <string name="notation_hint">Examples: d20, 2d6+3, 4d8-2</string>
+    <string name="notation_hint">Examples: %1$s, %2$s, %3$s</string>
     <string name="repeat_count">Repeat count</string>
     <string name="repeat_hint">Repeats: 1–%1$d. Maximum individual dice per batch: %2$d.</string>
     <string name="note_optional">Note (optional)</string>
@@ -31,7 +31,7 @@
     <string name="second_roll">Second group</string>
     <string name="chosen_total">Chosen total: %s</string>
     <string name="modifier_value">Modifier: %s</string>
-    <string name="error_notation">Use a dice expression such as d20, 2d6+3, or 4d8-2.</string>
+    <string name="error_notation">Use a dice expression such as %1$s, %2$s, or %3$s.</string>
     <string name="error_dice_limit">Dice per expression must be between 1 and %d.</string>
     <string name="error_sides_limit">Sides per die must be between 1 and %d.</string>
     <string name="error_modifier_limit">The modifier must be a whole number from -2147483648 to 2147483647.</string>

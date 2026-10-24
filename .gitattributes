@@ -1,0 +1,3 @@
+# Keep both Gradle entry points usable after cloning on another platform.
+gradlew text eol=lf
+gradlew.bat text eol=crlf
